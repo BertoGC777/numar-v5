@@ -1,0 +1,132 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Numar Store Design System
+   Bege #F5EFE6, Dourado #C9973A, Marrom #2A2017, Nude
+   Todas cores em HSL.
+*/
+
+@layer base {
+  :root {
+    --background: 36 38% 93%;          /* #F5EFE6 bege */
+    --foreground: 28 25% 14%;          /* marrom escuro */
+
+    --card: 0 0% 100%;
+    --card-foreground: 28 25% 14%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 28 25% 14%;
+
+    --primary: 38 56% 51%;             /* #C9973A dourado */
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 38 65% 62%;
+    --primary-dark: 34 52% 38%;
+
+    --secondary: 30 25% 88%;           /* nude claro */
+    --secondary-foreground: 28 25% 14%;
+
+    --muted: 32 22% 90%;
+    --muted-foreground: 28 12% 38%;
+
+    --accent: 30 30% 82%;              /* nude */
+    --accent-foreground: 28 25% 14%;
+
+    --destructive: 0 70% 45%;
+    --destructive-foreground: 0 0% 100%;
+
+    --success: 140 50% 40%;
+
+    --border: 32 18% 82%;
+    --input: 32 18% 82%;
+    --ring: 38 56% 51%;
+
+    --radius: 0.25rem;
+
+    /* Surfaces específicas */
+    --topbar: 34 52% 38%;              /* dourado escuro */
+    --topbar-foreground: 0 0% 100%;
+    --footer: 28 25% 12%;              /* marrom escuro */
+    --footer-foreground: 36 38% 88%;
+
+    --sale: 0 70% 45%;
+    --sale-foreground: 0 0% 100%;
+
+    --shadow-elegant: 0 10px 40px -12px hsl(28 25% 14% / 0.18);
+    --shadow-soft: 0 4px 16px -4px hsl(28 25% 14% / 0.08);
+    --gradient-gold: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+
+    --sidebar-background: 36 38% 93%;
+    --sidebar-foreground: 28 25% 14%;
+    --sidebar-primary: 38 56% 51%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 30 25% 88%;
+    --sidebar-accent-foreground: 28 25% 14%;
+    --sidebar-border: 32 18% 82%;
+    --sidebar-ring: 38 56% 51%;
+  }
+
+  .dark {
+    --background: 28 25% 10%;
+    --foreground: 36 38% 93%;
+    --card: 28 25% 12%;
+    --card-foreground: 36 38% 93%;
+    --popover: 28 25% 12%;
+    --popover-foreground: 36 38% 93%;
+    --primary: 38 56% 55%;
+    --primary-foreground: 28 25% 10%;
+    --secondary: 28 20% 18%;
+    --secondary-foreground: 36 38% 93%;
+    --muted: 28 20% 18%;
+    --muted-foreground: 32 12% 62%;
+    --accent: 28 20% 18%;
+    --accent-foreground: 36 38% 93%;
+    --destructive: 0 60% 40%;
+    --destructive-foreground: 36 38% 93%;
+    --border: 28 20% 18%;
+    --input: 28 20% 18%;
+    --ring: 38 56% 55%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: 'Montserrat', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, .font-serif {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+  }
+}
+
+@layer utilities {
+  .container-numar {
+    @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
+  }
+
+  .animate-pulse-soft {
+    animation: pulse-soft 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse-soft {
+    0%, 100% { box-shadow: 0 0 0 0 hsl(140 50% 40% / 0.5); }
+    50% { box-shadow: 0 0 0 14px hsl(140 50% 40% / 0); }
+  }
+
+  .fade-in {
+    animation: fadeIn 0.6s ease-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}

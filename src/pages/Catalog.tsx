@@ -1,0 +1,208 @@
+import { useMemo, useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
+import Layout from "@/components/Layout";
+import ProductCard from "@/components/ProductCard";
+import { products as allProducts } from "@/data/products";
+import { Slider } from "@/components/ui/slider";
+import { Button } from "@/components/ui/button";
+import { Sheet, SheetContent, SheetTrigger, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { SlidersHorizontal } from "lucide-react";
+
+const categoryLabels: Record<string, string> = {
+  vestidos: "Vestidos",
+  biquinis: "Biquínis",
+  "partes-de-cima": "Partes de Cima",
+  "partes-de-baixo": "Partes de Baixo",
+  conjuntos: "Conjuntos",
+  lancamentos: "Lançamentos",
+  promocao: "Promoção",
+};
+
+const allColors = Array.from(
+  new Map(allProducts.flatMap((p) => p.colors).map((c) => [c.name, c])).values()
+);
+const allSizes = Array.from(new Set(allProducts.flatMap((p) => p.sizes)));
+
+export default function Catalog() {
+  const { categoria } = useParams<{ categoria?: string }>();
+  const [searchParams] = useSearchParams();
+  const subFromUrl = searchParams.get("sub") ?? "";
+
+  const [sort, setSort] = useState("recent");
+  const [price, setPrice] = useState<[number, number]>([0, 500]);
+  const [colors, setColors] = useState<string[]>([]);
+  const [sizes, setSizes] = useState<string[]>([]);
+  const [visible, setVisible] = useState(12);
+
+  // Título: subcategoria tem prioridade, depois categoria, depois padrão
+  const title = subFromUrl
+    ? subFromUrl
+    : categoria
+    ? categoryLabels[categoria] ?? "Catálogo"
+    : "Todos os Produtos";
+
+  const filtered = useMemo(() => {
+    let list = [...allProducts];
+
+    if (categoria) {
+      if (categoria === "lancamentos") list = list.filter((p) => p.isNew);
+      else if (categoria === "promocao") list = list.filter((p) => p.isSale);
+      else list = list.filter((p) => p.category === categoria);
+    }
+
+    // Filtro de subcategoria via ?sub=
+    if (subFromUrl) {
+      list = list.filter((p) => p.subcategory === subFromUrl);
+    }
+
+    list = list.filter((p) => p.pricePix >= price[0] && p.pricePix <= price[1]);
+    if (colors.length) list = list.filter((p) => p.colors.some((c) => colors.includes(c.name)));
+    if (sizes.length) list = list.filter((p) => p.sizes.some((s) => sizes.includes(s)));
+
+    if (sort === "recent") list.sort((a, b) => b.id.localeCompare(a.id));
+    else if (sort === "asc") list.sort((a, b) => a.pricePix - b.pricePix);
+    else if (sort === "desc") list.sort((a, b) => b.pricePix - a.pricePix);
+
+    return list;
+  }, [categoria, subFromUrl, price, colors, sizes, sort]);
+
+  const toggle = (val: string, list: string[], setList: (v: string[]) => void) =>
+    setList(list.includes(val) ? list.filter((x) => x !== val) : [...list, val]);
+
+  const clearFilters = () => {
+    setColors([]);
+    setSizes([]);
+    setPrice([0, 500]);
+  };
+
+  const Filters = () => (
+    <div className="space-y-8">
+      <div>
+        <h4 className="text-xs uppercase tracking-widest mb-3 font-semibold">Faixa de preço</h4>
+        <Slider
+          min={0} max={500} step={10}
+          value={price}
+          onValueChange={(v) => setPrice(v as [number, number])}
+        />
+        <div className="flex justify-between text-xs mt-2 text-muted-foreground">
+          <span>R${price[0]}</span>
+          <span>R${price[1]}</span>
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-xs uppercase tracking-widest mb-3 font-semibold">Cor</h4>
+        <div className="flex flex-wrap gap-2">
+          {allColors.map((c) => (
+            <button
+              key={c.name}
+              onClick={() => toggle(c.name, colors, setColors)}
+              aria-label={c.name}
+              title={c.name}
+              className={`h-7 w-7 rounded-full border-2 transition-all ${
+                colors.includes(c.name) ? "ring-2 ring-primary ring-offset-2 border-transparent" : "border-border"
+              }`}
+              style={{ backgroundColor: c.hex }}
+            />
+          ))}
+        </div>
+      </div>
+
+      <div>
+        <h4 className="text-xs uppercase tracking-widest mb-3 font-semibold">Tamanho</h4>
+        <div className="flex flex-wrap gap-2">
+          {allSizes.map((s) => (
+            <button
+              key={s}
+              onClick={() => toggle(s, sizes, setSizes)}
+              className={`h-9 min-w-[44px] px-3 border text-sm transition ${
+                sizes.includes(s)
+                  ? "bg-primary text-primary-foreground border-primary"
+                  : "border-border hover:border-primary"
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <Button variant="outline" className="w-full" onClick={clearFilters}>
+        Limpar filtros
+      </Button>
+    </div>
+  );
+
+  return (
+    <Layout>
+      <div className="container-numar py-8 md:py-12">
+        <div className="text-center mb-8">
+          <h1 className="font-serif text-4xl md:text-5xl">{title}</h1>
+          <p className="text-sm text-muted-foreground mt-2">
+            {filtered.length} produto{filtered.length !== 1 && "s"}
+          </p>
+        </div>
+
+        <div className="flex items-center justify-between mb-6 gap-4">
+          <Sheet>
+            <SheetTrigger asChild>
+              <Button variant="outline" size="sm" className="md:hidden">
+                <SlidersHorizontal className="h-4 w-4 mr-2" /> Filtros
+              </Button>
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[85%] sm:max-w-sm bg-background">
+              <SheetHeader>
+                <SheetTitle className="font-serif text-2xl">Filtros</SheetTitle>
+              </SheetHeader>
+              <div className="mt-6"><Filters /></div>
+            </SheetContent>
+          </Sheet>
+
+          <div className="ml-auto">
+            <select
+              value={sort}
+              onChange={(e) => setSort(e.target.value)}
+              className="bg-background border border-border px-3 py-2 text-sm"
+            >
+              <option value="recent">Mais Recentes</option>
+              <option value="asc">Menor Preço</option>
+              <option value="desc">Maior Preço</option>
+            </select>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-[240px_1fr] gap-8">
+          <aside className="hidden md:block"><Filters /></aside>
+
+          <div>
+            {filtered.length === 0 ? (
+              <div className="text-center py-20 text-muted-foreground">
+                <p className="mb-4">Nenhum produto encontrado.</p>
+                <Button variant="outline" onClick={clearFilters}>Limpar filtros</Button>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                  {filtered.slice(0, visible).map((p) => (
+                    <ProductCard key={p.id} product={p} />
+                  ))}
+                </div>
+                {visible < filtered.length && (
+                  <div className="text-center mt-10">
+                    <Button
+                      variant="outline"
+                      onClick={() => setVisible((v) => v + 12)}
+                      className="uppercase tracking-widest"
+                    >
+                      Ver mais ({filtered.length - visible} produtos)
+                    </Button>
+                  </div>
+                )}
+              </>
+            )}
+          </div>
+        </div>
+      </div>
+    </Layout>
+  );
+}
