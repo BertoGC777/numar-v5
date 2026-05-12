@@ -9,7 +9,6 @@ export type CartItem = {
   pricePix: number;
   priceCard: number;
   color: string;
-  colorIdx: number;
   size: string;
   quantity: number;
 };
@@ -47,7 +46,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
   }, [items]);
 
-  const addItem: CartContextType["addItem"] = (product, color, size, qty = 1, colorIdx = 0) => {
+  const addItem: CartContextType["addItem"] = (product, color, size, qty = 1) => {
     setItems((prev) => {
       const key = itemKey({ productId: product.id, color, size });
       const existing = prev.find((i) => itemKey(i) === key);
@@ -60,11 +59,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
           productId: product.id,
           slug: product.slug,
           name: product.name,
-          image: product.images[colorIdx] ?? product.images[0],
+          image: product.images[0],
           pricePix: product.pricePix,
           priceCard: product.priceCard,
           color,
-          colorIdx,
           size,
           quantity: qty,
         },

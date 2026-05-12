@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { User, ShoppingBag, LogOut, Eye, EyeOff } from "lucide-react";
@@ -9,20 +10,20 @@ type Tab = "login" | "register";
 type Section = "profile" | "orders";
 
 const STORAGE_KEY = "numar.user.v1";
-
-function hashPassword(password: string): string {
-  let hash = 0;
-  for (let i = 0; i < password.length; i++) {
-    const char = password.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash |= 0;
-  }
-  return "hashed_" + Math.abs(hash).toString(36);
-}
+const PASS_PREFIX = "numar.pass.";
 
 function saveUser(u: User) { localStorage.setItem(STORAGE_KEY, JSON.stringify(u)); }
 function loadUser(): User | null {
   try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || "null"); } catch { return null; }
+}
+
+async function hashPass(pass: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(pass);
+  const hash = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(hash))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
 }
 
 export default function Account() {
@@ -32,35 +33,59 @@ export default function Account() {
   const [showPass, setShowPass] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
 
   // Form state
   const [form, setForm] = useState({ name: "", email: "", phone: "", password: "", confirm: "" });
-  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (k: string) => (e: React.ChangeEvent<HTMLInputElement>) => {
     setForm((f) => ({ ...f, [k]: e.target.value }));
+    // Clear field error when user types
+    if (fieldErrors[k]) setFieldErrors((prev) => { const { [k]: _, ...rest } = prev; return rest; });
+  };
 
-  const handleLogin = (e: React.FormEvent) => {
+  const validateField = (k: string, value: string, rules: { required?: boolean; minLength?: number; pattern?: RegExp; patternMsg?: string }): string => {
+    if (rules.required && !value.trim()) return "Este campo é obrigatório."
+    if (rules.minLength && value.trim().length < rules.minLength) return `Mínimo de ${rules.minLength} caracteres.`;
+    if (rules.pattern && value && !rules.pattern.test(value)) return rules.patternMsg || "Valor inválido.";
+    return "";
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setFieldErrors({});
+    const newErrors: Record<string, string> = {};
+    newErrors.email = validateField("email", form.email, { required: true });
+    newErrors.password = validateField("password", form.password, { required: true, minLength: 6 });
+    if (Object.values(newErrors).some(Boolean)) { setFieldErrors(newErrors); return; }
+
     const stored = loadUser();
-    if (!form.email || !form.password) { setError("Preencha todos os campos."); return; }
     if (!stored || stored.email !== form.email) { setError("E-mail não encontrado."); return; }
-    const pass = localStorage.getItem(`numar.pass.${form.email}`);
-    if (pass !== hashPassword(form.password)) { setError("Senha incorreta."); return; }
+    const hashedPass = await hashPass(form.password);
+    const storedHash = localStorage.getItem(`${PASS_PREFIX}${form.email}`);
+    if (storedHash !== hashedPass) { setError("Senha incorreta."); return; }
     setUser(stored);
   };
 
-  const handleRegister = (e: React.FormEvent) => {
+  const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
-    if (!form.name || !form.email || !form.password) { setError("Preencha todos os campos obrigatórios."); return; }
-    if (form.password !== form.confirm) { setError("As senhas não coincidem."); return; }
-    if (form.password.length < 6) { setError("A senha deve ter pelo menos 6 caracteres."); return; }
+    setFieldErrors({});
+    const newErrors: Record<string, string> = {};
+    newErrors.name = validateField("name", form.name, { required: true });
+    newErrors.email = validateField("email", form.email, { required: true, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/, patternMsg: "E-mail inválido." });
+    newErrors.password = validateField("password", form.password, { required: true, minLength: 6 });
+    newErrors.confirm = validateField("confirm", form.confirm, { required: true });
+    if (form.password !== form.confirm && form.confirm) newErrors.confirm = "As senhas não coincidem.";
+    if (Object.values(newErrors).some(Boolean)) { setFieldErrors(newErrors); return; }
+
     const newUser: User = { name: form.name, email: form.email, phone: form.phone };
     saveUser(newUser);
-    const hashedPassword = hashPassword(form.password);
-    localStorage.setItem(`numar.pass.${form.email}`, hashedPassword);
+    const hashedPass = await hashPass(form.password);
+    localStorage.setItem(`${PASS_PREFIX}${form.email}`, hashedPass);
     setUser(newUser);
     setSuccess("Conta criada com sucesso!");
+    setForm({ name: "", email: "", phone: "", password: "", confirm: "" });
   };
 
   const handleLogout = () => { setUser(null); setForm({ name: "", email: "", phone: "", password: "", confirm: "" }); };
@@ -79,6 +104,7 @@ export default function Account() {
   if (user) {
     return (
       <Layout>
+        <SEO title="Minha Conta" description="Gerencie seus dados, pedidos e informações na Numarstore." />
         <div className="container-numar py-10 max-w-3xl">
           <div className="flex items-center justify-between mb-8">
             <h1 className="font-serif text-3xl">Minha Conta</h1>
@@ -154,6 +180,7 @@ export default function Account() {
   // === LOGIN / REGISTER VIEW ===
   return (
     <Layout>
+      <SEO title="Minha Conta" description="Entre ou crie sua conta na Numarstore." />
       <div className="container-numar py-12 max-w-md">
         <h1 className="font-serif text-3xl text-center mb-2">Minha Conta</h1>
         <p className="text-center text-sm text-muted-foreground mb-8">
@@ -178,17 +205,19 @@ export default function Account() {
           <form onSubmit={handleLogin} className="space-y-4">
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">E-mail</label>
-              <Input type="email" placeholder="seu@email.com" value={form.email} onChange={set("email")} required />
+              <Input type="email" placeholder="seu@email.com" value={form.email} onChange={set("email")} required className={fieldErrors.email ? "border-destructive" : ""} />
+              {fieldErrors.email && <p className="text-xs text-destructive mt-1">{fieldErrors.email}</p>}
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Senha</label>
               <div className="relative">
-                <Input type={showPass ? "text" : "password"} placeholder="••••••" value={form.password} onChange={set("password")} required />
+                <Input type={showPass ? "text" : "password"} placeholder="••••••" value={form.password} onChange={set("password")} required className={fieldErrors.password ? "border-destructive" : ""} />
                 <button type="button" onClick={() => setShowPass(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {fieldErrors.password && <p className="text-xs text-destructive mt-1">{fieldErrors.password}</p>}
             </div>
             <Button type="submit" className="w-full h-11 uppercase tracking-widest">Entrar</Button>
             <p className="text-xs text-center text-muted-foreground">
@@ -200,11 +229,13 @@ export default function Account() {
           <form onSubmit={handleRegister} className="space-y-4">
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Nome completo *</label>
-              <Input placeholder="Seu nome" value={form.name} onChange={set("name")} required />
+              <Input placeholder="Seu nome" value={form.name} onChange={set("name")} required className={fieldErrors.name ? "border-destructive" : ""} />
+              {fieldErrors.name && <p className="text-xs text-destructive mt-1">{fieldErrors.name}</p>}
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">E-mail *</label>
-              <Input type="email" placeholder="seu@email.com" value={form.email} onChange={set("email")} required />
+              <Input type="email" placeholder="seu@email.com" value={form.email} onChange={set("email")} required className={fieldErrors.email ? "border-destructive" : ""} />
+              {fieldErrors.email && <p className="text-xs text-destructive mt-1">{fieldErrors.email}</p>}
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Telefone / WhatsApp</label>
@@ -213,16 +244,18 @@ export default function Account() {
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Senha *</label>
               <div className="relative">
-                <Input type={showPass ? "text" : "password"} placeholder="Mínimo 6 caracteres" value={form.password} onChange={set("password")} required />
+                <Input type={showPass ? "text" : "password"} placeholder="Mínimo 6 caracteres" value={form.password} onChange={set("password")} required className={fieldErrors.password ? "border-destructive" : ""} />
                 <button type="button" onClick={() => setShowPass(v => !v)}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground">
                   {showPass ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              {fieldErrors.password && <p className="text-xs text-destructive mt-1">{fieldErrors.password}</p>}
             </div>
             <div>
               <label className="text-xs text-muted-foreground mb-1 block">Confirmar senha *</label>
-              <Input type="password" placeholder="Repita a senha" value={form.confirm} onChange={set("confirm")} required />
+              <Input type="password" placeholder="Repita a senha" value={form.confirm} onChange={set("confirm")} required className={fieldErrors.confirm ? "border-destructive" : ""} />
+              {fieldErrors.confirm && <p className="text-xs text-destructive mt-1">{fieldErrors.confirm}</p>}
             </div>
             <Button type="submit" className="w-full h-11 uppercase tracking-widest">Criar Conta</Button>
             <p className="text-xs text-center text-muted-foreground">

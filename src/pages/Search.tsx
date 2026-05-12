@@ -1,5 +1,6 @@
 import { useSearchParams } from "react-router-dom";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import ProductCard from "@/components/ProductCard";
 import { products } from "@/data/products";
 
@@ -10,6 +11,15 @@ export default function Search() {
 
   return (
     <Layout>
+      <SEO
+        title={`Resultados para "${q}"`}
+        description={`${results.length} produto${results.length !== 1 ? "s" : ""} encontrado${results.length !== 1 ? "s" : ""} para "${q}" na Numarstore.`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "SearchResultsPage",
+          "name": `Resultados para "${q}"`,
+        }}
+      />
       <div className="container-numar py-12">
         <h1 className="font-serif text-4xl mb-2">Resultados para "{q}"</h1>
         <p className="text-sm text-muted-foreground mb-8">{results.length} produto{results.length !== 1 && "s"} encontrado{results.length !== 1 && "s"}</p>

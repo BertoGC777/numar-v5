@@ -1,8 +1,18 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 
 export default function Termos() {
   return (
     <Layout>
+      <SEO
+        title="Termos"
+        description="Termos de uso da Numarstore. Leia atentamente antes de utilizar nossos serviços."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Termos de Uso",
+        }}
+      />
       <div className="container-numar py-12 max-w-3xl mx-auto">
         <h1 className="font-serif text-4xl mb-8">Termos de Uso</h1>
         <p className="text-muted-foreground mb-6">Última atualização: janeiro de 2025</p>

@@ -1,8 +1,18 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 
 export default function Privacidade() {
   return (
     <Layout>
+      <SEO
+        title="Privacidade"
+        description="Política de privacidade da Numarstore. Saiba como coletamos, usamos e protegemos seus dados pessoais."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Política de Privacidade",
+        }}
+      />
       <div className="container-numar py-12 max-w-3xl mx-auto prose prose-sm">
         <h1 className="font-serif text-4xl mb-8">Política de Privacidade</h1>
         <p className="text-muted-foreground mb-6">Última atualização: janeiro de 2025</p>

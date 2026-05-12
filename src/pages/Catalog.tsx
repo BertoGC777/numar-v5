@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import ProductCard from "@/components/ProductCard";
 import { products as allProducts } from "@/data/products";
 import { Slider } from "@/components/ui/slider";
@@ -59,8 +60,7 @@ export default function Catalog() {
     if (colors.length) list = list.filter((p) => p.colors.some((c) => colors.includes(c.name)));
     if (sizes.length) list = list.filter((p) => p.sizes.some((s) => sizes.includes(s)));
 
-    if (sort === "recent") list.sort((a, b) => b.id.localeCompare(a.id));
-    else if (sort === "asc") list.sort((a, b) => a.pricePix - b.pricePix);
+    if (sort === "asc") list.sort((a, b) => a.pricePix - b.pricePix);
     else if (sort === "desc") list.sort((a, b) => b.pricePix - a.pricePix);
 
     return list;
@@ -135,6 +135,16 @@ export default function Catalog() {
 
   return (
     <Layout>
+      <SEO
+        title={title}
+        description={`Explore ${filtered.length} produtos${categoria ? ` na categoria ${categoryLabels[categoria] ?? categoria}` : ""} na Numarstore.`}
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "CollectionPage",
+          "name": title,
+          "description": `Explore ${filtered.length} produtos na Numarstore.`,
+        }}
+      />
       <div className="container-numar py-8 md:py-12">
         <div className="text-center mb-8">
           <h1 className="font-serif text-4xl md:text-5xl">{title}</h1>

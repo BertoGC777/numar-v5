@@ -15,7 +15,7 @@ export default function CollectionsGrid() {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5">
         {cols.map((c) => (
           <Link key={c.title} to={c.href} className="group relative block aspect-[4/5] overflow-hidden bg-muted">
-            <img src={c.img} alt={c.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" />
+            <img src={c.img} alt={c.title} width={400} height={533} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" loading="lazy" decoding="async" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
             <div className="absolute inset-x-0 bottom-0 p-6 text-white text-center">
               <h3 className="font-serif text-3xl md:text-4xl mb-3">{c.title}</h3>

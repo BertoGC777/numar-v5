@@ -2,14 +2,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCart, itemKey } from "@/context/CartContext";
-import { formatBRL } from "@/data/products";
+import Price from "@/components/Price";
 import { Minus, Plus, Trash2, ShoppingBag } from "lucide-react";
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
 export default function CartDrawer() {
   const { isOpen, close, items, updateQty, removeItem, subtotal } = useCart();
-  const navigate = useNavigate();
   const [cep, setCep] = useState("");
   const [shipping, setShipping] = useState<string | null>(null);
 
@@ -47,7 +46,7 @@ export default function CartDrawer() {
                     <div className="flex-1 min-w-0">
                       <Link to={`/produto/${item.slug}`} onClick={close} className="text-sm font-medium hover:text-primary line-clamp-2">{item.name}</Link>
                       <p className="text-xs text-muted-foreground mt-1">Cor: {item.color} · Tam: {item.size}</p>
-                      <p className="text-sm font-semibold text-primary mt-1">{formatBRL(item.pricePix)}</p>
+                      <Price value={item.pricePix} />
                       <div className="flex items-center justify-between mt-2">
                         <div className="flex items-center border border-border">
                           <button className="p-1.5 hover:bg-muted" onClick={() => updateQty(key, item.quantity - 1)} aria-label="Diminuir"><Minus className="h-3 w-3" /></button>
@@ -75,11 +74,10 @@ export default function CartDrawer() {
               </div>
               <div className="flex justify-between items-baseline">
                 <span className="text-sm">Subtotal</span>
-                <span className="font-serif text-2xl text-primary">{formatBRL(subtotal)}</span>
+                <span className="font-serif text-2xl text-primary"><Price value={subtotal} /></span>
               </div>
               <p className="text-xs text-muted-foreground">ou em até 3x sem juros no cartão</p>
-              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-sm uppercase tracking-wider"
-                onClick={() => { close(); navigate("/checkout"); }}>
+              <Button className="w-full bg-primary text-primary-foreground hover:bg-primary/90 h-12 text-sm uppercase tracking-wider">
                 Finalizar Compra
               </Button>
               <Button variant="ghost" className="w-full" onClick={close}>Continuar comprando</Button>

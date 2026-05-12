@@ -7,23 +7,23 @@ export default function Footer() {
       <div className="container-numar py-14 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
         <div>
           <h4 className="font-serif text-lg mb-4 text-primary">Ajuda</h4>
-          <ul className="space-y-2 opacity-90">
-            <li><Link to="/trocas-e-devolucoes" className="hover:text-primary">Trocas e Devoluções</Link></li>
-            <li><Link to="/busca" className="hover:text-primary">Rastreie seu Pedido</Link></li>
+          <ul className="space-y-2 opacity-90" role="list">
+            <li><Link to="/trocas" className="hover:text-primary">Trocas e Devoluções</Link></li>
+            <li><Link to="/rastreio" className="hover:text-primary">Rastreie seu Pedido</Link></li>
             <li><Link to="/faq" className="hover:text-primary">Perguntas Frequentes</Link></li>
           </ul>
         </div>
         <div>
           <h4 className="font-serif text-lg mb-4 text-primary">Empresa</h4>
-          <ul className="space-y-2 opacity-90">
-            <li><Link to="/privacidade#empresa" className="hover:text-primary">Quem Somos</Link></li>
-            <li><Link to="/privacidade#contato" className="hover:text-primary">Lojas Físicas</Link></li>
-            <li><Link to="/privacidade#contato" className="hover:text-primary">Trabalhe Conosco</Link></li>
+          <ul className="space-y-2 opacity-90" role="list">
+            <li><Link to="/quem-somos" className="hover:text-primary">Quem Somos</Link></li>
+            <li><a href="#" className="hover:text-primary">Lojas Físicas</a></li>
+            <li><a href="#" className="hover:text-primary">Trabalhe Conosco</a></li>
           </ul>
         </div>
         <div>
           <h4 className="font-serif text-lg mb-4 text-primary">Políticas</h4>
-          <ul className="space-y-2 opacity-90">
+          <ul className="space-y-2 opacity-90" role="list">
             <li><Link to="/privacidade" className="hover:text-primary">Política de Privacidade</Link></li>
             <li><Link to="/termos" className="hover:text-primary">Termos de Uso</Link></li>
           </ul>
@@ -31,9 +31,9 @@ export default function Footer() {
         <div>
           <h4 className="font-serif text-lg mb-4 text-primary">Siga-nos</h4>
           <div className="flex gap-3 opacity-90">
-            <a href="#" aria-label="Instagram" className="hover:text-primary"><Instagram className="h-5 w-5" /></a>
+            <a href="https://instagram.com/use.numar" aria-label="Instagram" target="_blank" rel="noopener noreferrer" className="hover:text-primary"><Instagram className="h-5 w-5" /></a>
             <a href="#" aria-label="TikTok" className="hover:text-primary"><Music2 className="h-5 w-5" /></a>
-            <a href="#" aria-label="WhatsApp" className="hover:text-primary"><MessageCircle className="h-5 w-5" /></a>
+            <a href="https://wa.me/5521979674510" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer" className="hover:text-primary"><MessageCircle className="h-5 w-5" /></a>
           </div>
         </div>
       </div>

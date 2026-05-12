@@ -1,12 +1,15 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useParams, Link } from "react-router-dom";
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { getProductBySlug, getRelated, formatBRL } from "@/data/products";
 import ProductCard from "@/components/ProductCard";
+import ProductPageSkeleton from "@/components/ProductPageSkeleton";
+import Price from "@/components/Price";
 import { Button } from "@/components/ui/button";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { useCart } from "@/context/CartContext";
-import { Minus, Plus, MessageCircle, ChevronRight, CreditCard, Banknote, QrCode } from "lucide-react";
+import { Minus, Plus, MessageCircle, ChevronRight, CreditCard, Banknote, QrCode, Shield, Truck, RotateCcw } from "lucide-react";
 
 export default function ProductPage() {
   const { slug } = useParams<{ slug: string }>();
@@ -15,6 +18,13 @@ export default function ProductPage() {
   const [colorIdx, setColorIdx] = useState(0);
   const [size, setSize] = useState(product?.sizes[0] ?? "");
   const [qty, setQty] = useState(1);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+    const t = setTimeout(() => setLoading(false), 300);
+    return () => clearTimeout(t);
+  }, [slug]);
 
   if (!product) {
     return (
@@ -27,23 +37,50 @@ export default function ProductPage() {
     );
   }
 
-  const numColors = product.colors.length;
-  // Primary image: image for selected color
-  const currentMainImg = product.images[colorIdx] ?? product.images[0];
-  // All images for gallery: one per color + second photos
-  const galleryImages = product.images;
+  if (loading) {
+    return (
+      <Layout>
+        <ProductPageSkeleton />
+      </Layout>
+    );
+  }
 
-  // When color changes, jump to that color's image
+  const numColors = useMemo(() => product.colors.length, [product]);
+  const currentMainImg = useMemo(
+    () => product.images[colorIdx] ?? product.images[0],
+    [product, colorIdx]
+  );
+  const galleryImages = useMemo(() => product.images, [product]);
+  const related = useMemo(() => getRelated(product.id, 4), [product.id]);
+  const wpp = useMemo(() => {
+    const msg = `Olá! Tenho interesse no produto: *${product.name}* - Cor: ${product.colors[colorIdx].name}\n${window.location.href}`;
+    return `https://wa.me/5521979674510?text=${encodeURIComponent(msg)}`;
+  }, [product, colorIdx]);
+
   const handleColorChange = (i: number) => {
     setColorIdx(i);
   };
 
-  const related = getRelated(product.id, 4);
-  const wppMsg = `Olá! Tenho interesse no produto: *${product.name}* - Cor: ${product.colors[colorIdx].name}\n${window.location.href}`;
-  const wpp = `https://wa.me/5521979674510?text=${encodeURIComponent(wppMsg)}`;
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    "name": product.name,
+    "description": product.description,
+    "image": product.images[0],
+    "offers": {
+      "@type": "Offer",
+      "priceCurrency": "BRL",
+      "price": product.pricePix,
+      "availability": "https://schema.org/InStock"
+    },
+    "brand": { "@type": "Brand", "name": "Numar Store" },
+    "category": product.category.replace(/-/g, " ")
+  };
 
   return (
     <Layout>
+      <SEO title={product.name} description={product.description} image={product.images[0]} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       <div className="container-numar py-6">
         {/* Breadcrumb */}
         <nav className="text-xs text-muted-foreground flex items-center gap-1 mb-6 flex-wrap">
@@ -72,7 +109,7 @@ export default function ProductPage() {
                     currentMainImg === img ? "border-primary" : "border-transparent hover:border-muted-foreground"
                   }`}
                 >
-                  <img src={img} alt="" className="w-full h-full object-cover" />
+                  <img src={img} alt="" width={200} height={267} loading="lazy" decoding="async" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
@@ -82,6 +119,10 @@ export default function ProductPage() {
                 key={`${product.id}-${colorIdx}`}
                 src={currentMainImg}
                 alt={product.name}
+                width={600}
+                height={800}
+                loading="lazy"
+                decoding="async"
                 className="w-full h-full object-cover transition-opacity duration-300"
               />
             </div>
@@ -92,18 +133,18 @@ export default function ProductPage() {
             <h1 className="font-serif text-3xl md:text-4xl mb-3">{product.name}</h1>
 
             {/* Price block */}
-            <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-2">
+            <div className="bg-muted/50 rounded-lg p-4 mb-6 space-y-3">
               <div className="flex items-center gap-2">
                 <QrCode className="h-4 w-4 text-primary" />
-                <span className="font-serif text-3xl text-primary">{formatBRL(product.pricePix)}</span>
+                <Price value={product.pricePix} className="text-3xl font-serif text-primary font-semibold" />
                 <span className="text-sm text-muted-foreground">no Pix</span>
                 {product.oldPrice && (
-                  <span className="text-sm text-muted-foreground line-through ml-2">{formatBRL(product.oldPrice)}</span>
+                  <Price value={product.oldPrice} className="text-sm text-muted-foreground line-through ml-2" />
                 )}
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <CreditCard className="h-4 w-4" />
-                <span>ou <strong className="text-foreground">{formatBRL(product.priceCard)}</strong> em até 3x sem juros</span>
+                <span>ou <Price value={product.priceCard} showLabel /> em até 3x sem juros</span>
               </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <Banknote className="h-4 w-4" />
@@ -172,24 +213,40 @@ export default function ProductPage() {
             {/* Action buttons */}
             <div className="space-y-3">
               <Button
-                onClick={() => addItem(product, product.colors[colorIdx].name, size, qty, colorIdx)}
+                onClick={() => addItem(product, product.colors[colorIdx].name, size, qty)}
                 className="w-full h-12 uppercase tracking-widest text-sm"
               >
+                <MessageCircle className="h-4 w-4 mr-2" />
                 Adicionar ao Carrinho
               </Button>
               <a
                 href={wpp}
                 target="_blank"
                 rel="noreferrer"
-                className="flex items-center justify-center gap-2 w-full h-12 border border-foreground uppercase tracking-widest text-sm hover:bg-foreground hover:text-background transition"
+                className="flex items-center justify-center gap-2 w-full h-12 border border-primary bg-primary/5 text-primary uppercase tracking-widest text-sm hover:bg-primary hover:text-background transition"
               >
-                <MessageCircle className="h-4 w-4" /> Comprar pelo WhatsApp
+                <MessageCircle className="h-4 w-4" />
+                Comprar pelo WhatsApp
               </a>
             </div>
 
-            {/* Payment info */}
-            <div className="mt-4 p-3 bg-muted/30 rounded text-xs text-muted-foreground text-center">
-              🔒 Pagamento 100% seguro via Mercado Pago · Pix · Cartão · Boleto
+            {/* Trust badges */}
+            <div className="grid grid-cols-3 gap-2 mt-6 pt-4 border-t border-border">
+              <div className="flex flex-col items-center gap-1 text-[10px] text-muted-foreground">
+                <Truck className="h-4 w-4 text-primary" />
+                <span className="text-center">Frete Grátis</span>
+                <span className="text-center">acima de R$300</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-[10px] text-muted-foreground">
+                <Shield className="h-4 w-4 text-primary" />
+                <span className="text-center">Pagamento</span>
+                <span className="text-center">100% seguro</span>
+              </div>
+              <div className="flex flex-col items-center gap-1 text-[10px] text-muted-foreground">
+                <RotateCcw className="h-4 w-4 text-primary" />
+                <span className="text-center">Trocas</span>
+                <span className="text-center">em 30 dias</span>
+              </div>
             </div>
 
             {/* Accordion details */}

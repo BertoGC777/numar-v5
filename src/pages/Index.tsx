@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import HeroCarousel from "@/components/HeroCarousel";
 import CategoryShortcuts from "@/components/CategoryShortcuts";
 import BenefitsBar from "@/components/BenefitsBar";
@@ -13,6 +14,22 @@ const Index = () => {
   const featured = getFeatured(8);
   return (
     <Layout>
+      <SEO
+        title="Moda Feminina"
+        description="Descubra as últimas tendências da moda feminina na Numarstore. Vestidos, biquínis, conjuntos e muito mais com qualidade e elegância."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "Organization",
+          "name": "Numar Store",
+          "url": "https://numarstore.com.br",
+          "logo": "https://numarstore.com.br/logo.png",
+          "description": "Moda feminina sofisticada — vestidos, biquínis, conjuntos e muito mais.",
+          "sameAs": [
+            "https://instagram.com/use.numar",
+            "https://wa.me/5521979674510",
+          ],
+        }}
+      />
       <HeroCarousel />
       <CategoryShortcuts />
       <BenefitsBar />

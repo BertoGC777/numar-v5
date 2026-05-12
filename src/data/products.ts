@@ -312,23 +312,7 @@ export const getProductsByCategory = (cat?: string) =>
           (cat === "promocao" && p.isSale)
       )
     : products;
-const hash = (str: string): number => {
-  let h = 0;
-  for (let i = 0; i < str.length; i++) h = ((h << 5) - h + str.charCodeAt(i)) | 0;
-  return Math.abs(h);
-};
-
-export const getFeatured = (n = 8) => {
-  const d = new Date();
-  const seed = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-  const daySeed = hash(seed);
-  const shuffled = [...products].sort((a, b) => {
-    const hA = hash(`${a.id}-${daySeed}`);
-    const hB = hash(`${b.id}-${daySeed}`);
-    return hA - hB;
-  });
-  return shuffled.slice(0, n);
-};
+export const getFeatured = (n = 8) => [...products].sort(() => Math.random() - 0.5).slice(0, n);
 export const getRelated = (id: string, n = 4) =>
   products.filter((p) => p.id !== id).slice(0, n);
 export const formatBRL = (v: number) =>

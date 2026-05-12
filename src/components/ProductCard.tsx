@@ -1,10 +1,11 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { Product, formatBRL } from "@/data/products";
+import { Product } from "@/data/products";
 import { useCart } from "@/context/CartContext";
 import { Button } from "@/components/ui/button";
+import Price from "@/components/Price";
 
-export default function ProductCard({ product }: { product: Product }) {
+const ProductCard = React.memo(function ProductCard({ product }: { product: Product }) {
   const { addItem } = useCart();
   const [colorIdx, setColorIdx] = useState(0);
 
@@ -27,15 +28,21 @@ export default function ProductCard({ product }: { product: Product }) {
           key={`main-${colorIdx}`}
           src={mainImg}
           alt={product.name}
+          width={400}
+          height={533}
           className="w-full h-full object-cover transition-opacity duration-500 group-hover:opacity-0"
           loading="lazy"
+          decoding="async"
         />
         <img
           key={`hover-${colorIdx}`}
           src={hoverImg}
           alt=""
+          width={400}
+          height={533}
           className="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           loading="lazy"
+          decoding="async"
         />
         <div className="absolute top-2 left-2 flex flex-col gap-1">
           {product.isNew && (
@@ -55,11 +62,8 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         <div>
-          <p className="text-base font-serif text-primary font-semibold">
-            {formatBRL(product.pricePix)}{" "}
-            <span className="text-xs font-sans text-muted-foreground">no Pix</span>
-          </p>
-          <p className="text-xs text-muted-foreground">ou {formatBRL(product.priceCard)} em até 3x</p>
+          <Price value={product.pricePix} /> <span className="text-xs text-muted-foreground">no Pix</span>
+          <p className="text-xs text-muted-foreground">ou <Price value={product.priceCard} /> em até 3x</p>
         </div>
 
         {numColors > 1 && (
@@ -86,11 +90,13 @@ export default function ProductCard({ product }: { product: Product }) {
           variant="outline"
           size="sm"
           className="w-full opacity-0 group-hover:opacity-100 transition-opacity uppercase tracking-wider text-xs border-foreground hover:bg-foreground hover:text-background"
-          onClick={() => addItem(product, product.colors[colorIdx].name, product.sizes[0], 1, colorIdx)}
+          onClick={() => addItem(product, product.colors[colorIdx].name, product.sizes[0], 1)}
         >
           Adicionar
         </Button>
       </div>
     </div>
   );
-}
+});
+
+export default ProductCard;

@@ -1,4 +1,5 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 
 const faqs = [
@@ -15,6 +16,19 @@ const faqs = [
 export default function FAQ() {
   return (
     <Layout>
+      <SEO
+        title="Perguntas Frequentes"
+        description="Encontre respostas para as dúvidas mais comuns sobre produtos, envio, pagamentos e trocas na Numar Store."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "FAQPage",
+          "mainEntity": faqs.map((f) => ({
+            "@type": "QuestionAnswer",
+            "name": f.q,
+            "acceptedAnswer": { "@type": "Answer", "text": f.a },
+          })),
+        }}
+      />
       <div className="container-numar py-12 max-w-2xl mx-auto">
         <h1 className="font-serif text-4xl mb-2 text-center">Perguntas Frequentes</h1>
         <p className="text-muted-foreground text-center mb-10 text-sm">Encontre respostas para as dúvidas mais comuns</p>

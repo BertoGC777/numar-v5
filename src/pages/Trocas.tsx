@@ -1,9 +1,19 @@
 import Layout from "@/components/Layout";
+import SEO from "@/components/SEO";
 import { MessageCircle } from "lucide-react";
 
 export default function Trocas() {
   return (
     <Layout>
+      <SEO
+        title="Trocas e Devoluções"
+        description="Política de trocas e devoluções da Numarstore. Saiba como solicitar trocas em até 30 dias após o recebimento."
+        jsonLd={{
+          "@context": "https://schema.org",
+          "@type": "WebPage",
+          "name": "Trocas e Devoluções",
+        }}
+      />
       <div className="container-numar py-12 max-w-3xl mx-auto">
         <h1 className="font-serif text-4xl mb-8">Trocas e Devoluções</h1>
 

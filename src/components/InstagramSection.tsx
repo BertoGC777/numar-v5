@@ -20,7 +20,7 @@ export default function InstagramSection() {
       <div className="grid grid-cols-3 md:grid-cols-6 gap-1.5 md:gap-2">
         {photos.map((src, i) => (
           <a key={i} href="https://instagram.com/use.numar" target="_blank" rel="noreferrer" className="group relative block aspect-square overflow-hidden bg-muted">
-            <img src={src} alt="Numar Store" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" />
+            <img src={src} alt="Numar Store" width={400} height={400} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" loading="lazy" decoding="async" />
             <div className="absolute inset-0 bg-foreground/0 group-hover:bg-foreground/40 transition-colors flex items-center justify-center">
               <Instagram className="h-6 w-6 text-white opacity-0 group-hover:opacity-100 transition" />
             </div>
